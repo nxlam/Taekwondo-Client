@@ -4,6 +4,8 @@ import View.View;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.Score;
 
 /*
@@ -23,13 +25,6 @@ public class Services {
 
     public Services() {
         // luong connect
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                connect();
-            }
-        }).start();
-
         // luong view
         thread = new Thread(new Runnable() {
             @Override
@@ -45,20 +40,25 @@ public class Services {
             @Override
             public void run() {
                 while (true) {
+                    
                     while (!thread.isAlive()) {
                         if (view.score.getStatus().equalsIgnoreCase("new")) {
                             try {
+                                connect();
                                 System.out.println("[CLIENT] " + view.score.getColor()
                                     + ", " + view.score.getPoint() + ", " + view.score.getStatus());
-                                send(view.score);
+                                Score score = view.score;
+                                send(score);
                                 view.score.setStatus("old");
                                 System.out.println("[CLIENT 2] " + view.score.getColor()
                                     + ", " + view.score.getPoint() + ", " + view.score.getStatus());
+                                close();
                             } catch (IOException ex) {
                                 ex.printStackTrace();
                             }
                         }
                     }
+                    
                 }
             }
         }).start();
